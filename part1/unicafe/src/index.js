@@ -17,22 +17,39 @@ const Feedback = ({goodHandler, badHandler, neutralHandler}) => {
     )
 }
 
+const Statistic = ({text, value}) => <tr><td>{text}</td><td>{value}</td></tr>
+
 const Statistics = ({good, bad, neutral}) => {
     const total = good + bad + neutral
     const average = (good * 1 + neutral * 0 + bad * -1)/total
-    const positive = good/total
-    return (
-        <>
-            <Header text={'Statistics'} />
-            <p>good: {good}</p>
-            <p>bad: {bad}</p>
-            <p>neutral: {neutral}</p>
-            <p>all: {total}</p>
-            <p>average: {average}</p>
-            <p>positive: {positive} %</p>
-        </>
-    )
+    const positivePct = (good/total) * 100
+
+    if (total === 0) {
+        return (
+            <>
+                <Header text={'Statistics'} />
+                No feedback given.
+            </>
+        )
+    } else {
+        return (
+            <>
+                <Header text={'Statistics'} />
+                <table>
+                    <tbody>
+                        <Statistic text={'good'} value={good} />
+                        <Statistic text={'bad'} value={bad} />
+                        <Statistic text={'neutral'} value={neutral} />
+                        <Statistic text={'all'} value={total} />
+                        <Statistic text={'average'} value={average} />
+                        <Statistic text={'positive'} value={`${positivePct} %`} />
+                    </tbody>
+                </table>
+            </>
+        )
+    }
 }
+
 
 const App = () => {
   // save clicks of each button to own state
