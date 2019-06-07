@@ -18,12 +18,18 @@ const Feedback = ({goodHandler, badHandler, neutralHandler}) => {
 }
 
 const Statistics = ({good, bad, neutral}) => {
+    const total = good + bad + neutral
+    const average = (good * 1 + neutral * 0 + bad * -1)/total
+    const positive = good/total
     return (
         <>
             <Header text={'Statistics'} />
             <p>good: {good}</p>
             <p>bad: {bad}</p>
             <p>neutral: {neutral}</p>
+            <p>all: {total}</p>
+            <p>average: {average}</p>
+            <p>positive: {positive} %</p>
         </>
     )
 }
