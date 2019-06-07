@@ -1,0 +1,22 @@
+kayttaja->selain:
+note left of selain
+  käyttäjä kirjoittaa uuden muistiinpanon tekstikenttään
+  ja klikkaa Talleta nappia
+end note
+note right of selain
+  talleta nappiin on asetettu Javascript -koodi, joka parsii muistiinpanon
+  sille varatusta tilasta ja lisää sen selaimen muistissa olevaan listaan
+  sekä piirtää uudelleen muistiinpanot. 
+end note
+selain->kayttaja: sivu on valmis
+selain->palvelin: POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+note right of selain
+  sama koodi käskee selainta hakemaan muistiinpanon sille varatusta
+  listasta, lisää sille päivämäärän ja lähettää palvelimelle POST pyyntönä
+end note
+palvelin->selain: 201, Created
+note left of palvelin
+  palvelin ilmoittaa käsittelleensä pyynnön, selain ei käytä tätä tietoa
+  mitenkään
+end note
+

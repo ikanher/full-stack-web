@@ -1,0 +1,32 @@
+kayttaja->selain:
+note left of selain
+    käyttäjä kirjoittaa uuden muistiinpanon tekstikenttään
+    ja klikkaa Talleta -nappia
+end note
+selain->palvelin: POST https://fullstack-exampleapp.herokuapp.com/new_note
+note right of selain
+  selain lähettää palvelimelle POST pyynnön, joka sisältää
+  uuden muistiinpanon tiedot
+end note
+palvelin->selain: status 302 - Location: /notes
+note left of palvelin
+  palvelin vastaanottaa POST pyynnön ja käsiteltyään sen ohjaa
+  Location otsakkeella käyttäjän takaisin muistiinpanolistaan
+end note
+selain->palvelin: GET https://fullstack-exampleapp.herokuapp.com/notes
+note right of selain:
+  huomattuaan Location otsakkeen selain tekee automaattisesti uuden pyynnön
+end note
+palvelin->selain: 200, sivun HTML koodi
+selain->palvelin: GET https://fullstack-exampleapp.herokuapp.com/main.js
+palvelin->selain: 200, Javascript koodi
+selain->palvelin: GET https://fullstack-exampleapp.herokuapp.com/main.css
+palvelin->selain: 200, CSS koodi
+selain->palvelin: GET https://fullstack-exampleapp.herokuapp.com/data.json
+palvelin->selain: 200, data.json sisältö
+selain->kayttaja: valmis sivu
+note left of selain:
+  selain lisää JSON tiedoston sisällön sille varattuun paikkaan
+  Javascript koodin mukaisesti ja näyttää sen käyttäjälle
+end note
+
