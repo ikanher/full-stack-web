@@ -4,7 +4,8 @@ const Phonebook = ({
         persons, handleAddPerson,
         newName, handleNameChange,
         newNumber, handleNumberChange,
-        filter, handleFilterChange
+        filter, handleFilterChange,
+        handleDeleteClick
     }) => {
 
     return (
@@ -16,7 +17,7 @@ const Phonebook = ({
                 newName={newName} handleNameChange={handleNameChange}
                 newNumber={newNumber} handleNumberChange={handleNumberChange}
             />
-            <Persons entries={persons} filter={filter}/>
+            <Persons entries={persons} filter={filter} handleDeleteClick={handleDeleteClick} />
         </div>
     )
 }
@@ -50,10 +51,11 @@ const PersonForm = ({
     )
 }
 
-const Persons = ({ entries, filter }) => {
+const Persons = ({ entries, filter, handleDeleteClick }) => {
     const rows = entries
         .filter(e => e.name.toLowerCase().includes(filter.toLowerCase()))
-        .map(e => <Person key={e.name} entry={e} />)
+        .map(e => <Person key={e.name} entry={e} handleDeleteClick={handleDeleteClick} />)
+
     return (
         <>
             <h2>Persons</h2>
@@ -62,9 +64,13 @@ const Persons = ({ entries, filter }) => {
     )
 }
 
-const Person = ({ entry }) => {
+const Person = ({ entry, handleDeleteClick }) => {
+    const DeleteButton = ({ entry }) => {
+        return <button value={entry.id} onClick={handleDeleteClick}>Delete</button> 
+    }
+
     return (
-        <p>{entry.name} {entry.number}</p>
+        <p>{entry.name} {entry.number} <DeleteButton entry={entry} /> </p>
     )
 }
 
