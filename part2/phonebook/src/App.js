@@ -4,10 +4,12 @@ import Phonebook from './components/Phonebook.js'
 import personService from './services/persons.js'
 
 const App = () => {
+    const notificationTimeout = 2000
     const [ persons, setPersons] = useState([])
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
     const [ filter, setFilter ] = useState('')
+    const [ notification, setNotification ] = useState({})
 
     const handleFilterChange = (event) => setFilter(event.target.value)
     const handleAddPerson = (event) => {
@@ -28,14 +30,24 @@ const App = () => {
                     personService.update(person).then(response => {
                         const newPersons = persons.filter(p => p.id !== id).concat(person)
                         setPersons(newPersons)
+                        setNotification({msg: `Number updated for ${person.name}!`, color: 'green'})
+                        setTimeout(() => setNotification({}), notificationTimeout)
                     })
                 }
+            }).catch((error) => {
+                const msg = `${newName} has already been removed from server...`
+                setNotification({msg: msg, color: 'red'})
+                setTimeout(() => setNotification({}), notificationTimeout)
+                const newPersons = persons.filter(p => p.id !== id)
+                setPersons(newPersons)
             })
         } else {
             // does not exist, create
             const entry = { name: newName, number: newNumber }
             personService.create(entry).then((person) => {
                 setPersons(persons.concat(person))
+                setNotification({msg: `${person.name} added!`, color: 'green'})
+                setTimeout(() => setNotification({}), notificationTimeout)
             })
         }
 
@@ -72,6 +84,7 @@ const App = () => {
         filter={filter}
         handleFilterChange={handleFilterChange}
         handleDeleteClick={handleDeleteClick}
+        notification={notification}
     />
 }
 
