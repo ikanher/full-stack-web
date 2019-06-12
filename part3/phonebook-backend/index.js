@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
+import cors from 'cors'
 
 let persons = [
     {
@@ -20,9 +21,15 @@ const app = express()
 // middleware
 app.use(bodyParser.json())
 
+// cross origin requests
+app.use(cors())
+
 // morgan body token
 morgan.token('body', (req) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+
+// frontend
+app.use(express.static('build'))
 
 // routes
 app.get('/info', (req, res) => {
@@ -71,7 +78,7 @@ app.post('/api/persons', (req, res) => {
     res.json(person)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
