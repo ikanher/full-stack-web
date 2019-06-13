@@ -4,6 +4,8 @@
   "description": "Fullstack Open Course Phonebook Backend",
   "main": "index.js",
   "scripts": {
+    "build:ui": "rm -rf build && cd ../../part2/phonebook && npm run build --prod && cp -r build ../../part3/phonebook-backend",
+    "deploy": "git subtree --prefix part3/phonebook-backend/ push heroku master",
     "start": "node --experimental-modules index.js",
     "watch": "nodemon --experimental-modules index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
