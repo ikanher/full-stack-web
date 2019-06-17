@@ -26,16 +26,16 @@ const App = () => {
                 if (window.confirm(msg)) {
                     // update the number
                     person.number = newNumber
-                    personService.update(person).then(response => {
+                    personService.update(person).then(() => {
                         const newPersons = persons.filter(p => p.id !== id).concat(person)
                         setPersons(newPersons)
-                        setNotification({msg: `Number updated for ${person.name}!`, color: 'green'})
+                        setNotification({ msg: `Number updated for ${person.name}!`, color: 'green' })
                         setTimeout(() => setNotification({}), notificationTimeout)
                     })
                 }
-            }).catch(error => {
+            }).catch(() => {
                 const msg = `${newName} has already been removed from server...`
-                setNotification({msg: msg, color: 'red'})
+                setNotification({ msg: msg, color: 'red' })
                 setTimeout(() => setNotification({}), notificationTimeout)
                 const newPersons = persons.filter(p => p.id !== id)
                 setPersons(newPersons)
@@ -45,10 +45,10 @@ const App = () => {
             const entry = { name: newName, number: newNumber }
             personService.create(entry).then(person => {
                 setPersons(persons.concat(person))
-                setNotification({msg: `${person.name} added!`, color: 'green'})
+                setNotification({ msg: `${person.name} added!`, color: 'green' })
                 setTimeout(() => setNotification({}), notificationTimeout)
             }).catch(error => {
-                setNotification({msg: error.response.data.error, color: 'red'})
+                setNotification({ msg: error.response.data.error, color: 'red' })
                 setTimeout(() => setNotification({}), notificationTimeout)
             })
         }
@@ -68,7 +68,7 @@ const App = () => {
         const id = event.target.value
         personService.get(id).then(person => {
             if (window.confirm(`Delete ${person.name}?`)) {
-                personService.remove(id).then(response => {
+                personService.remove(id).then(() => {
                     const newPersons = persons.filter(p => p.id !== id)
                     setPersons(newPersons)
                 })
