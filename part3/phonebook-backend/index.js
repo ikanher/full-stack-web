@@ -26,7 +26,7 @@ morgan.token('body', (req) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 // routes
-app.get('/info', (req, res) => {
+app.get('/info', (req, res, next) => {
     Person.estimatedDocumentCount().then(count => {
         res.send(`Phonebook has info for ${count} people.<br/><br/>${new Date()}`)
     }).catch(error => next(error))
@@ -49,7 +49,7 @@ app.get('/api/persons/:id', (req, res, next) => {
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
-    Person.findByIdAndRemove(req.params.id).then(result => {
+    Person.findByIdAndRemove(req.params.id).then(() => {
         res.status(204).end()
     }).catch(error => next(error))
 })
@@ -86,7 +86,7 @@ app.use(unknownEndpoint)
 const errorHandler = (error, req, res, next) => {
     console.error(`! Error: ${error.message}`)
 
-    if (error.name === 'CastError' && error.kind == 'ObjectId') {
+    if (error.name === 'CastError' && error.kind === 'ObjectId') {
         return res.status(400).send({ error: 'malformatted id' })
     } else if (error.name === 'ValidationError') {
         return res.status(400).send({ error: error.message })
