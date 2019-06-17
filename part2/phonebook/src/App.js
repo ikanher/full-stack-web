@@ -63,7 +63,7 @@ const App = () => {
     }, [])
 
     const handleDeleteClick = (event) => {
-        const id = parseInt(event.target.value)
+        const id = event.target.value
         personService.get(id).then((person) => {
             if (window.confirm(`Delete ${person.name}?`)) {
                 personService.remove(id).then(response => {
