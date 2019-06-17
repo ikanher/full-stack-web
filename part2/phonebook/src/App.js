@@ -21,10 +21,9 @@ const App = () => {
             // exists, get id of the object
             const id = existing[0].id
 
-            personService.get(id).then((person) => {
+            personService.get(id).then(person => {
                 const msg = `${person.name} exists. Update?`
                 if (window.confirm(msg)) {
-
                     // update the number
                     person.number = newNumber
                     personService.update(person).then(response => {
@@ -34,7 +33,7 @@ const App = () => {
                         setTimeout(() => setNotification({}), notificationTimeout)
                     })
                 }
-            }).catch((error) => {
+            }).catch(error => {
                 const msg = `${newName} has already been removed from server...`
                 setNotification({msg: msg, color: 'red'})
                 setTimeout(() => setNotification({}), notificationTimeout)
@@ -44,9 +43,12 @@ const App = () => {
         } else {
             // does not exist, create
             const entry = { name: newName, number: newNumber }
-            personService.create(entry).then((person) => {
+            personService.create(entry).then(person => {
                 setPersons(persons.concat(person))
                 setNotification({msg: `${person.name} added!`, color: 'green'})
+                setTimeout(() => setNotification({}), notificationTimeout)
+            }).catch(error => {
+                setNotification({msg: error.response.data.error, color: 'red'})
                 setTimeout(() => setNotification({}), notificationTimeout)
             })
         }
@@ -64,7 +66,7 @@ const App = () => {
 
     const handleDeleteClick = (event) => {
         const id = event.target.value
-        personService.get(id).then((person) => {
+        personService.get(id).then(person => {
             if (window.confirm(`Delete ${person.name}?`)) {
                 personService.remove(id).then(response => {
                     const newPersons = persons.filter(p => p.id !== id)
