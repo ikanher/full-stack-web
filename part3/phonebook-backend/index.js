@@ -16,6 +16,9 @@ app.use(express.static('build'))
 // json body parser
 app.use(bodyParser.json())
 
+// cross-origin requests
+app.use(cors())
+
 // morgan body token
 morgan.token('body', (req) => JSON.stringify(req.body))
 
@@ -52,24 +55,12 @@ app.delete('/api/persons/:id', (req, res, next) => {
 })
 
 app.post('/api/persons', (req, res, next) => {
-    if (!req.body.name) {
-        res.status(400).json({ error: 'name missing in request' })
-    }
-    if (!req.body.number) {
-        res.status(400).json({ error: 'number missing in request' })
-    }
-    Person.find({ name: req.body.name }).then(response => {
-        if (response.length > 0) {
-            res.status(400).json({ error: 'name must unique' })
-        }
-    }).catch(error => next(error))
-
     const person = new Person({
         name: req.body.name,
         number: req.body.number,
     })
 
-    person.save().then(p => res.json(p.toJSON())).catch(error => next(Error))
+    person.save().then(p => res.json(p.toJSON())).catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
@@ -97,6 +88,8 @@ const errorHandler = (error, req, res, next) => {
 
     if (error.name === 'CastError' && error.kind == 'ObjectId') {
         return res.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return res.status(400).send({ error: error.message })
     }
     next(error)
 }
