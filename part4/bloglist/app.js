@@ -5,6 +5,7 @@ import mongoose from 'mongoose'
 
 import config from './utils/config.js'
 import blogsRouter from './controllers/blogs.js'
+import errorHandler from './utils/middleware.js'
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
     .then(() => {
@@ -18,5 +19,6 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 app.use('/api/blogs', blogsRouter)
+app.use(errorHandler)
 
 export default app
