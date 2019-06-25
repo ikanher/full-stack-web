@@ -5,7 +5,9 @@ import mongoose from 'mongoose'
 
 import config from './utils/config.js'
 import blogsRouter from './controllers/blogs.js'
-import errorHandler from './utils/middleware.js'
+import usersRouter from './controllers/users.js'
+import loginRouter from './controllers/login.js'
+import middleware from './utils/middleware.js'
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
     .then(() => {
@@ -18,7 +20,10 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
+app.use(middleware.jwtTokenHandler)
 app.use('/api/blogs', blogsRouter)
-app.use(errorHandler)
+app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
+app.use(middleware.errorHandler)
 
 export default app
