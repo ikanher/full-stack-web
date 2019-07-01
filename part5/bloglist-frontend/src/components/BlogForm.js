@@ -1,21 +1,20 @@
 import React from 'react'
 
+import FormInputField from './FormInputField.js'
+
 const BlogForm = ({
-    title, handleTitleChange,
-    author, handleAuthorChange,
-    url, handleUrlChange,
+    titleField,
+    authorField,
+    urlField,
     handleAddBlog,
 }) => {
     return (
         <>
             <b>Create a new blog entry</b>
             <form onSubmit={handleAddBlog}>
-                Title: <input value={title} onChange={handleTitleChange} />
-                <br />
-                Author: <input value={author} onChange={handleAuthorChange} />
-                <br />
-                URL: <input value={url} onChange={handleUrlChange} />
-                <br />
+                <FormInputField name='title' field={titleField} />
+                <FormInputField name='author' field={authorField} />
+                <FormInputField name='url' field={urlField} />
                 <button type='submit'>Save</button>
             </form>
         </>

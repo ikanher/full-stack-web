@@ -10,66 +10,74 @@ import LoginForm from './components/LoginForm.js'
 import Notification from './components/Notification.js'
 import Togglable from './components/Togglable.js'
 
+import { useField } from './hooks'
+
 const App = () => {
     const NOTIFICATION_TIMEOUT = 3000
 
     const [ user, setUser ] = useState(null)
-    const [ username, setUsername ] = useState('')
-    const [ password, setPassword ] = useState('')
+    const usernameField = useField('text')
+    const passwordField = useField('text')
+
     const [ notification, setNotification ] = useState({})
 
     const [ blogs, setBlogs ] = useState([])
-    const [ title, setTitle ] = useState([])
-    const [ author, setAuthor ] = useState([])
-    const [ url, setUrl ] = useState([])
 
-    const handleTitleChange = ({ target }) => setTitle(target.value)
-    const handleAuthorChange = ({ target }) => setAuthor(target.value)
-    const handleUrlChange = ({ target }) => setUrl(target.value)
+    const titleField = useField('text')
+    const authorField = useField('text')
+    const urlField = useField('text')
+
     const handleAddBlog = async (event) => {
         event.preventDefault()
+
+        const title = titleField.value
+        const author = authorField.value
+        const url = urlField.value
+
         const response = await blogService.create({ title, author, url })
+
         setBlogs(blogs.concat(response))
         setNotification({ msg: `A new blog ${response.title} by ${response.author} added.` })
         setTimeout(() => setNotification({}), NOTIFICATION_TIMEOUT)
-        setTitle('')
-        setAuthor('')
-        setUrl('')
+
+        titleField.reset()
+        authorField.reset()
+        urlField.reset()
     }
 
     const logoutButtonHandler = () => {
         window.localStorage.removeItem('user')
         setUser(null)
-        setUsername(null)
     }
 
     const handleLogin = async (event) => {
         event.preventDefault()
         try {
+            const username = usernameField.value
+            const password = passwordField.value
             const user = await loginService.login({ username, password })
 
             setUser(user)
-            setUsername(user.username)
-            setPassword('')
 
             blogService.setToken(user.token)
 
             window.localStorage.setItem('user', JSON.stringify(user))
+
+            usernameField.reset()
+            passwordField.reset()
+
         } catch (exception) {
             setNotification({ msg: 'Wrong credentials', color: 'red' })
             setTimeout(() => setNotification({}), NOTIFICATION_TIMEOUT)
+            passwordField.reset()
         }
     }
-
-    const handleUsernameChange = ({ target }) => setUsername(target.value)
-    const handlePasswordChange = ({ target }) => setPassword(target.value)
 
     useEffect(() => {
         const userJSON = window.localStorage.getItem('user')
         if (userJSON) {
             const user = JSON.parse(userJSON)
             setUser(user)
-            setUsername(user.username)
             blogService.setToken(user.token)
         }
     }, [])
@@ -109,10 +117,8 @@ const App = () => {
             { user === null ?
                 <LoginForm
                     handleSubmit={handleLogin}
-                    handleUsernameChange={handleUsernameChange}
-                    handlePasswordChange={handlePasswordChange}
-                    username={username}
-                    password={password}
+                    usernameField={usernameField}
+                    passwordField={passwordField}
                 />
                 :
                 <>
@@ -124,20 +130,20 @@ const App = () => {
                         <Blog
                             key={b.id}
                             blog={b}
-                            currentUsername={username}
+                            currentUser={user}
                             handleLikeButtonClick={handleLikeButtonClick}
                             handleRemoveButtonClick={handleRemoveButtonClick}
                         />
                     )}
                     <Togglable buttonLabel='New blog'>
                         <BlogForm
-                            handleTitleChange={handleTitleChange}
-                            handleAuthorChange={handleAuthorChange}
-                            handleUrlChange={handleUrlChange}
+                            titleField={titleField}
+                            authorField={authorField}
+                            urlField={urlField}
                             handleAddBlog={handleAddBlog}
-                            title={title}
-                            author={author}
-                            url={url}
+                            title={titleField.value}
+                            author={authorField.value}
+                            url={urlField.value}
                         />
                     </Togglable>
                 </>

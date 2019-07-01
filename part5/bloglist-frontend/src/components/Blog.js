@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const Blog = ({ blog, currentUsername, handleLikeButtonClick, handleRemoveButtonClick }) => {
+const Blog = ({ blog, currentUser, handleLikeButtonClick, handleRemoveButtonClick }) => {
     const [ expand, setExpand ] = useState(false)
 
     const blogStyle = {
@@ -17,7 +17,7 @@ const Blog = ({ blog, currentUsername, handleLikeButtonClick, handleRemoveButton
 
     const LikeButton = () => <button value={blog.id} onClick={handleLikeButtonClick}>like</button>
     const RemoveButton = () => {
-        if (currentUsername === blog.user.username) {
+        if (currentUser.username === blog.user.username) {
             return (
                 <button value={blog.id} onClick={handleRemoveButtonClick}>delete</button>
             )
