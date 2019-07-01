@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const Blog = ({ blog, user, handleLikeButtonClick, handleRemoveButtonClick }) => {
+const Blog = ({ blog, currentUsername, handleLikeButtonClick, handleRemoveButtonClick }) => {
     const [ expand, setExpand ] = useState(false)
 
     const blogStyle = {
@@ -12,12 +12,12 @@ const Blog = ({ blog, user, handleLikeButtonClick, handleRemoveButtonClick }) =>
     }
 
     const expandStyle = {
-        display: expand ? '' : 'none'
+        display: expand ? 'block' : 'none'
     }
 
     const LikeButton = () => <button value={blog.id} onClick={handleLikeButtonClick}>like</button>
     const RemoveButton = () => {
-        if (user.id === blog.user.id) {
+        if (currentUsername === blog.user.username) {
             return (
                 <button value={blog.id} onClick={handleRemoveButtonClick}>delete</button>
             )
@@ -26,11 +26,11 @@ const Blog = ({ blog, user, handleLikeButtonClick, handleRemoveButtonClick }) =>
     }
 
     return (
-        <div style={blogStyle}>
-            <div onClick={() => setExpand(!expand)}>
+        <div style={blogStyle} className='blogEntry'>
+            <div onClick={() => setExpand(!expand)} id='mainInfo'>
                 {blog.title} {blog.author}
             </div>
-            <div style={expandStyle}>
+            <div style={expandStyle} id='additionalInfo'>
                 <a href={blog.url}>{blog.url}</a>
                 <br />
                 likes {blog.likes} <LikeButton />

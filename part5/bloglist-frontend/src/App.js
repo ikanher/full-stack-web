@@ -40,6 +40,7 @@ const App = () => {
     const logoutButtonHandler = () => {
         window.localStorage.removeItem('user')
         setUser(null)
+        setUsername(null)
     }
 
     const handleLogin = async (event) => {
@@ -48,7 +49,7 @@ const App = () => {
             const user = await loginService.login({ username, password })
 
             setUser(user)
-            setUsername('')
+            setUsername(user.username)
             setPassword('')
 
             blogService.setToken(user.token)
@@ -68,6 +69,7 @@ const App = () => {
         if (userJSON) {
             const user = JSON.parse(userJSON)
             setUser(user)
+            setUsername(user.username)
             blogService.setToken(user.token)
         }
     }, [])
@@ -122,7 +124,7 @@ const App = () => {
                         <Blog
                             key={b.id}
                             blog={b}
-                            user={user}
+                            currentUsername={username}
                             handleLikeButtonClick={handleLikeButtonClick}
                             handleRemoveButtonClick={handleRemoveButtonClick}
                         />
