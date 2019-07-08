@@ -9,6 +9,7 @@ test('renders content', () => {
     const author = 'Arnold Author'
     const url = 'http://example.com'
     const userId = 1
+    const userName = 'testtest'
 
     const blog = {
         title: title,
@@ -22,10 +23,11 @@ test('renders content', () => {
 
     const user = {
         id: userId,
+        username: userName,
     }
 
     const component = render(
-        <Blog blog={blog} user={user} />
+        <Blog blog={blog} currentUser={user} />
     )
 
     const mainInfo = component.container.querySelector('#mainInfo')
@@ -41,6 +43,7 @@ test('clicking on the blog reveals additional info ', async () => {
     const author = 'Arnold Author'
     const url = 'http://example.com'
     const userId = 1
+    const userName = 'testtest'
 
     const blog = {
         title: title,
@@ -54,10 +57,11 @@ test('clicking on the blog reveals additional info ', async () => {
 
     const user = {
         id: userId,
+        username: userName,
     }
 
     const component = render(
-        <Blog blog={blog} user={user} />
+        <Blog blog={blog} currentUser={user} />
     )
 
     const mainInfo = component.container.querySelector('#mainInfo')

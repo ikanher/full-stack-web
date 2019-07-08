@@ -22,16 +22,14 @@ describe('<App />', () => {
         )
         component.rerender(<App />)
 
-        const blogs = await waitForElement(() => component.querySelectorAll('.blogEntry'))
-        expect(blogs).toBe(null)
+        await waitForElement(() => component.getByText('Blogs'))
+
+        const blogs = component.container.querySelectorAll('.blogEntry')
+
+        expect(blogs.length).toBe(0)
     })
 
     test('if user is logged in, blog list is present', async () => {
-        const component = render(
-            <App />
-        )
-        component.rerender(<App />)
-
         const user = {
             username: 'testuser',
             token: '1234',
@@ -40,7 +38,15 @@ describe('<App />', () => {
 
         localStorage.setItem('user', JSON.stringify(user))
 
-        const blogs = await waitForElement(() => component.querySelectorAll('.blogEntry'))
+        const component = render(
+            <App />
+        )
+        component.rerender(<App />)
+
+        await waitForElement(() => component.getByText('Blogs'))
+
+        const blogs = component.container.querySelectorAll('.blogEntry')
+
         expect(blogs.length).toBe(4)
     })
 })
