@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { Form, Button } from 'semantic-ui-react'
 
 import { createBlog } from '../reducers/blogReducer.js'
 import { setNotification } from '../reducers/notificationReducer.js'
@@ -22,17 +23,28 @@ const BlogForm = (props) => {
         event.target.title.value = ''
         event.target.author.value = ''
         event.target.url.value = ''
+
+        props.togglableRef.current.toggleVisibility()
     }
 
     return (
         <>
-            <b>Create a new blog entry</b>
-            <form onSubmit={handleSubmit}>
-                <p>Title: <input name='title' /></p>
-                <p>Author: <input name='author' /></p>
-                <p>URL: <input name='url' /></p>
-                <button type='submit'>Save</button>
-            </form>
+            <h3>Create a new blog entry</h3>
+            <Form onSubmit={handleSubmit}>
+                <Form.Field>
+                    <label>Title</label>
+                    <input name='title' />
+                </Form.Field>
+                <Form.Field>
+                    <label>Author</label>
+                    <input name='author' />
+                </Form.Field>
+                <Form.Field>
+                    <label>URL</label>
+                    <input name='url' />
+                </Form.Field>
+                <Button type='submit' size='tiny' color='green'>Save</Button>
+            </Form>
         </>
     )
 }

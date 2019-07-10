@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { Form, Button } from 'semantic-ui-react'
 
 import { commentBlog } from '../reducers/blogDetailReducer.js'
 
@@ -16,12 +17,13 @@ const CommentForm = (props) => {
 
     return (
         <>
-            <form onSubmit={handleSubmit}>
-                <p>
+            <Form onSubmit={handleSubmit}>
+                <Form.Field>
+                    <label>Comment</label>
                     <input name='comment' />
-                    <button type='submit'>Add comment</button>
-                </p>
-            </form>
+                </Form.Field>
+                <Button type='submit' color='green' size='tiny'>Add comment</Button>
+            </Form>
         </>
     )
 }

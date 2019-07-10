@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
+import { Button, Segment } from 'semantic-ui-react'
 
 import CommentList from './CommentList.js'
 
@@ -30,12 +31,20 @@ const BlogDetail = (props) => {
         }
     }
 
-    const LikeButton = ({ id }) => <button value={id} onClick={handleLikeButtonClick}>like</button>
+    const LikeButton = ({ id }) =>
+        <Button size='mini' value={id} onClick={handleLikeButtonClick}>Like</Button>
 
     const RemoveButton = ({ currentUser, blog }) => {
-        if (currentUser && currentUser === blog.user.username) {
+        if (currentUser && currentUser.username === blog.user.username) {
             return (
-                <button value={blog.id} onClick={handleRemoveButtonClick(props)}>delete</button>
+                <Button
+                    color='red'
+                    size='tiny'
+                    value={blog.id}
+                    onClick={handleRemoveButtonClick(props)}
+                >
+                    Delete
+                </Button>
             )
         }
         return null
@@ -43,12 +52,14 @@ const BlogDetail = (props) => {
 
     return (
         <>
-            <h2>{blog.title}</h2>
-            <p><a href={blog.url} target='_blank' rel='noopener noreferrer'>{blog.url}</a></p>
-            <p>has {blog.likes} likes <LikeButton id={blog.id} /></p>
-            <p>added by {blog.user.name}</p>
-            <RemoveButton currentUser={props.loggedInUser.username} blog={blog} />
-            <CommentList comments={blog.comments} blogId={blog.id} />
+            <Segment>
+                <h2>{blog.title}</h2>
+                <Segment><a href={blog.url} target='_blank' rel='noopener noreferrer'>{blog.url}</a></Segment>
+                <Segment>Has {blog.likes} likes <LikeButton id={blog.id} /></Segment>
+                <Segment>Added by {blog.user.name}</Segment>
+                <RemoveButton currentUser={props.loggedInUser} blog={blog} />
+                <CommentList comments={blog.comments} blogId={blog.id} />
+            </Segment>
         </>
     )
 }

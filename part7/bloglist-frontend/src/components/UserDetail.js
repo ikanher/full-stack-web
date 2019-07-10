@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
+import { List, Segment } from 'semantic-ui-react'
 
 import { getUser } from '../reducers/userDetailReducer.js'
 
@@ -15,12 +16,12 @@ const UserDetail = (props) => {
     }
 
     return (
-        <>
+        <Segment>
             <h2>{user.name}</h2>
-            <ul>
-                {user.blogs.map(b => <li key={b.id}>{b.title}</li>)}
-            </ul>
-        </>
+            <List bulleted celled relaxed>
+                {user.blogs.map(b => <List.Item key={b.id}>{b.title}</List.Item>)}
+            </List>
+        </Segment>
     )
 }
 

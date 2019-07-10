@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
+import { Table } from 'semantic-ui-react'
 
 import { initializeBlogs } from '../reducers/blogReducer.js'
 
@@ -12,17 +13,23 @@ const BlogList = (props) => {
         props.initializeBlogs()
     }, [])
 
+    const togglableRef = React.createRef()
+
     return (
         <>
             { props.loggedInUser ?
-                <Togglable buttonLabel='New blog'>
-                    <BlogForm />
+                <Togglable buttonLabel='New blog' ref={togglableRef}>
+                    <BlogForm togglableRef={togglableRef} />
                 </Togglable>
                 : null
             }
-            {props.blogs.map(b =>
-                <Blog key={b.id} blog={b} />
-            )}
+            <Table striped celled>
+                <Table.Body>
+                    {props.blogs.map(b =>
+                        <Blog key={b.id} blog={b} />
+                    )}
+                </Table.Body>
+            </Table>
         </>
     )
 }

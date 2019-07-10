@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
+import { Table } from 'semantic-ui-react'
 
 import { initializeUsers } from '../reducers/userReducer.js'
 
@@ -12,22 +13,22 @@ const UserList = (props) => {
     return (
         <>
             <h2>Users</h2>
-            <table>
-                <tbody>
-                    <tr>
-                        <th>Name</th>
-                        <th>Blogs created</th>
-                    </tr>
+            <Table>
+                <Table.Body>
+                    <Table.Row>
+                        <Table.HeaderCell>Name</Table.HeaderCell>
+                        <Table.HeaderCell>Blogs created</Table.HeaderCell>
+                    </Table.Row>
                     {props.users.map(u =>
-                        <tr key={u.id}>
-                            <td>
+                        <Table.Row key={u.id}>
+                            <Table.Cell>
                                 <Link to={`/users/${u.id}`}>{u.name}</Link>
-                            </td>
-                            <td>{u.blogs.length}</td>
-                        </tr>
+                            </Table.Cell>
+                            <Table.Cell>{u.blogs.length}</Table.Cell>
+                        </Table.Row>
                     )}
-                </tbody>
-            </table>
+                </Table.Body>
+            </Table>
         </>
     )
 }

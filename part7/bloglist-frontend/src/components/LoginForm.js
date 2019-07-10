@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { Form, Button } from 'semantic-ui-react'
 
 import { login } from '../reducers/loginReducer.js'
 
@@ -10,16 +11,23 @@ const LoginForm = (props) => {
         props.login(event.target.username.value, event.target.password.value)
         event.target.username.value = ''
         event.target.password.value = ''
+        props.history.push('/')
     }
 
     return (
         <>
             <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <p>Username: <input name='username' /></p>
-                <p>Password: <input name='password' /></p>
-                <button type='submit'>login</button>
-            </form>
+            <Form onSubmit={handleSubmit}>
+                <Form.Field>
+                    <label>Username</label>
+                    <input name='username' />
+                </Form.Field>
+                <Form.Field>
+                    <label>Password</label>
+                    <input name='password' />
+                </Form.Field>
+                <Button type='submit' size='tiny'>Login</Button>
+            </Form>
         </>
     )
 }
