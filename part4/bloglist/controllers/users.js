@@ -9,6 +9,11 @@ usersRouter.get('/', async (req, res) => {
     res.json(users.map(u => u.toJSON()))
 })
 
+usersRouter.get('/:id', async (req, res) => {
+    const user = await User.findById(req.params.id).populate('blogs')
+    res.json(user.toJSON())
+})
+
 usersRouter.post('/', async (req, res, next) => {
     class ValidationError extends Error {
         constructor(message) {
