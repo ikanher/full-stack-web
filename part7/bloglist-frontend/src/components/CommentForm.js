@@ -20,9 +20,16 @@ const CommentForm = (props) => {
             <Form onSubmit={handleSubmit}>
                 <Form.Field>
                     <label>Comment</label>
-                    <input name='comment' />
+                    <input name='comment' data-testid='comment'/>
                 </Form.Field>
-                <Button type='submit' color='green' size='tiny'>Add comment</Button>
+                <Button
+                    type='submit'
+                    color='green'
+                    size='tiny'
+                    data-testid='submitComment'
+                >
+                    Add comment
+                </Button>
             </Form>
         </>
     )

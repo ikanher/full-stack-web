@@ -16,7 +16,7 @@ const BlogForm = (props) => {
 
         props.createBlog({ title, author, url })
         const notification = {
-            msg: `A new blog ${title} by ${author} added.`
+            msg: `A new blog '${title}' by ${author} added.`
         }
         props.setNotification(notification)
 
@@ -33,17 +33,17 @@ const BlogForm = (props) => {
             <Form onSubmit={handleSubmit}>
                 <Form.Field>
                     <label>Title</label>
-                    <input name='title' />
+                    <input name='title' data-testid='title'/>
                 </Form.Field>
                 <Form.Field>
                     <label>Author</label>
-                    <input name='author' />
+                    <input name='author' data-testid='author'/>
                 </Form.Field>
                 <Form.Field>
                     <label>URL</label>
-                    <input name='url' />
+                    <input name='url' data-testid='url'/>
                 </Form.Field>
-                <Button type='submit' size='tiny' color='green'>Save</Button>
+                <Button type='submit' size='tiny' color='green' data-testid='submit'>Save</Button>
             </Form>
         </>
     )

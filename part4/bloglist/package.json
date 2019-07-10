@@ -8,7 +8,8 @@
     "start": "cross-env NODE_ENV=production node --experimental-modules index.js",
     "watch": "cross-env NODE_ENV=development nodemon --experimental-modules index.js",
     "lint": "eslint .",
-    "test": "cross-env NODE_ENV=test jest --verbose"
+    "test": "cross-env NODE_ENV=test jest --verbose",
+    "start:test": "cross-env NODE_ENV=test node --experimental-modules index.js"
   },
   "author": "Aki Rehn",
   "license": "ISC",

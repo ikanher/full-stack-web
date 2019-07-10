@@ -20,13 +20,13 @@ const LoginForm = (props) => {
             <Form onSubmit={handleSubmit}>
                 <Form.Field>
                     <label>Username</label>
-                    <input name='username' />
+                    <input name='username' data-testid='username'/>
                 </Form.Field>
                 <Form.Field>
                     <label>Password</label>
-                    <input name='password' />
+                    <input name='password' data-testid='password'/>
                 </Form.Field>
-                <Button type='submit' size='tiny'>Login</Button>
+                <Button type='submit' size='tiny' data-testid='submit'>Login</Button>
             </Form>
         </>
     )

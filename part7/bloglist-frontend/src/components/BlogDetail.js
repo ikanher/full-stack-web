@@ -32,7 +32,14 @@ const BlogDetail = (props) => {
     }
 
     const LikeButton = ({ id }) =>
-        <Button size='mini' value={id} onClick={handleLikeButtonClick}>Like</Button>
+        <Button
+            size='mini'
+            value={id}
+            onClick={handleLikeButtonClick}
+            data-testid='likeButton'
+        >
+            Like
+        </Button>
 
     const RemoveButton = ({ currentUser, blog }) => {
         if (currentUser && currentUser.username === blog.user.username) {
