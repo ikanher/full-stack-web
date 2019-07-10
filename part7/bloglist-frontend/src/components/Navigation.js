@@ -17,10 +17,10 @@ const Navigation = (props) => {
             { props.loggedInUser
                 ?
                     <>
-                        <Menu.Item color='white'>
+                        <Menu.Item>
                             <em>{props.loggedInUser.name} logged in</em>
                         </Menu.Item>
-                        <Menu.Item link color='white' onClick={props.logout}>
+                        <Menu.Item link onClick={props.logout}>
                             Logout
                         </Menu.Item>
                     </>
