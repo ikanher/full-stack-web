@@ -3,10 +3,6 @@ import userService from '../services/users.js'
 
 const blogReducer = (state = [], action) => {
     switch(action.type) {
-    case 'LIKE_BLOG': {
-        const blog = action.data
-        return state.map(b => b.id === blog.id ? blog : b)
-    }
     case 'CREATE_BLOG': {
         return state.concat(action.data)
     }
@@ -22,16 +18,6 @@ const blogReducer = (state = [], action) => {
     }
     default:
         return state
-    }
-}
-
-export const likeBlog = (id) => {
-    return async (dispatch) => {
-        const likedBlog = await blogService.like(id)
-        dispatch({
-            type: 'LIKE_BLOG',
-            data: likedBlog,
-        })
     }
 }
 

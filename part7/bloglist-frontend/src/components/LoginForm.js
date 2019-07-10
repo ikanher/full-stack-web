@@ -7,7 +7,9 @@ const LoginForm = (props) => {
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-        props.login(event.target.username, event.target.password)
+        props.login(event.target.username.value, event.target.password.value)
+        event.target.username.value = ''
+        event.target.password.value = ''
     }
 
     return (

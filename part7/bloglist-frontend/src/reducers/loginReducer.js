@@ -27,13 +27,9 @@ export const likeBlog = (id) => {
     }
 }
 
-export const login = (usernameInput, passwordInput) => {
+export const login = (username, password) => {
     return async (dispatch) => {
-
         try {
-            const username = usernameInput.value
-            const password = passwordInput.value
-
             const user = await loginService.login({ username, password })
             window.localStorage.setItem('user', JSON.stringify(user))
             blogService.setToken(user.token)
@@ -42,15 +38,16 @@ export const login = (usernameInput, passwordInput) => {
                 type: 'LOGIN_USER',
                 data: user
             })
-
-            usernameInput.value = ''
-            passwordInput.value = ''
         } catch (exception) {
             dispatch({
                 type: 'SET_NOTIFICATION',
                 data: { msg: 'Wrong credentials', color: 'red' }
             })
-            passwordInput.value = ''
+            setTimeout(() => {
+                dispatch({
+                    type: 'CLEAR_NOTIFICATION',
+                })
+            }, 5000)
         }
     }
 }

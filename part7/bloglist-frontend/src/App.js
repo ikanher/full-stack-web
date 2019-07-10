@@ -1,58 +1,58 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
+import {
+    BrowserRouter as Router, Route
+} from 'react-router-dom'
 
-import { initializeBlogs } from './reducers/blogReducer.js'
 import { localStorageLogin } from './reducers/loginReducer.js'
 
-import Blog from './components/Blog.js'
-import BlogForm from './components/BlogForm.js'
-import LoggedInUserInfo from './components/LoggedInUserInfo.js'
+import BlogDetail from './components/BlogDetail.js'
+import BlogList from './components/BlogList.js'
 import LoginForm from './components/LoginForm.js'
+import Menu from './components/Menu.js'
 import Notification from './components/Notification.js'
-import Togglable from './components/Togglable.js'
+import UserDetail from './components/UserDetail.js'
+import UserList from './components/UserList.js'
 
 const App = (props) => {
     useEffect(() => {
         props.localStorageLogin()
-        props.initializeBlogs()
     }, [])
 
     return (
         <div>
-            <h1>Blogs</h1>
+            <Router>
+                <Menu />
+                <h1>Blogs</h1>
 
-            <Notification />
+                <Notification />
 
-            { !props.user ?
-                <LoginForm />
-                :
-                <>
-                    <LoggedInUserInfo />
-                    {props.blogs.map(b =>
-                        <Blog key={b.id} blog={b} />
-                    )}
-                    <Togglable buttonLabel='New blog'>
-                        <BlogForm />
-                    </Togglable>
-                </>
-            }
+                { !props.loggedInUser ? <LoginForm /> : null}
+
+                <Route exact path='/' render={() =>
+                    <BlogList />
+                } />
+                <Route exact path="/blogs/:id" render={({ match, history }) =>
+                    <BlogDetail history={history} blogId={match.params.id} />
+                } />
+                <Route exact path='/users' render={() =>
+                    <UserList />
+                } />
+                <Route exact path="/users/:id" render={({ match }) =>
+                    <UserDetail userId={match.params.id} />
+                } />
+            </Router>
         </div>
     )
 }
 
-const sortBlogs = (blogs) => {
-    return blogs.sort((a, b) => b.likes - a.likes)
-}
-
 const mapStateToProps = (state) => {
     return {
-        user: state.user,
-        blogs: sortBlogs(state.blogs),
+        loggedInUser: state.loggedInUser,
     }
 }
 
 const mapDispatchToProps = {
-    initializeBlogs,
     localStorageLogin,
 }
 

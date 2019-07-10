@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { createBlog, likeBlog } from '../reducers/blogReducer.js'
+import { createBlog } from '../reducers/blogReducer.js'
 import { setNotification } from '../reducers/notificationReducer.js'
 
 const BlogForm = (props) => {
@@ -13,7 +13,7 @@ const BlogForm = (props) => {
         const author = event.target.author.value
         const url = event.target.url.value
 
-        props.createBlog({ title, author, url})
+        props.createBlog({ title, author, url })
         const notification = {
             msg: `A new blog ${title} by ${author} added.`
         }
@@ -39,7 +39,6 @@ const BlogForm = (props) => {
 
 const mapDispatchToProps = {
     createBlog,
-    likeBlog,
     setNotification,
 }
 
