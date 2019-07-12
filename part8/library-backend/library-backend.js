@@ -1,177 +1,207 @@
-const { ApolloServer, gql } = require('apollo-server')
-const uuid = require('uuid/v1')
+const {
+    ApolloServer,
+    gql,
+    UserInputError,
+    AuthenticationError,
+} = require('apollo-server')
 
-let authors = [
-    {
-        name: 'Robert Martin',
-        id: 'afa51ab0-344d-11e9-a414-719c6709cf3e',
-        born: 1952,
-    },
-    {
-        name: 'Martin Fowler',
-        id: 'afa5b6f0-344d-11e9-a414-719c6709cf3e',
-        born: 1963
-    },
-    {
-        name: 'Fyodor Dostoevsky',
-        id: 'afa5b6f1-344d-11e9-a414-719c6709cf3e',
-        born: 1821
-    },
-    {
-        name: 'Joshua Kerievsky', // birthyear not known
-        id: 'afa5b6f2-344d-11e9-a414-719c6709cf3e',
-    },
-    {
-        name: 'Sandi Metz', // birthyear not known
-        id: 'afa5b6f3-344d-11e9-a414-719c6709cf3e',
-    },
-]
+const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
+mongoose.set('useFindAndModify', false)
 
-/*
- * It would be more sensible to assosiate book and the author by saving 
- * the author id instead of the name to the book.
- * For simplicity we however save the author name.
-*/
+require('dotenv').config()
 
-let books = [
-    {
-        title: 'Clean Code',
-        published: 2008,
-        author: 'Robert Martin',
-        id: 'afa5b6f4-344d-11e9-a414-719c6709cf3e',
-        genres: ['refactoring']
-    },
-    {
-        title: 'Agile software development',
-        published: 2002,
-        author: 'Robert Martin',
-        id: 'afa5b6f5-344d-11e9-a414-719c6709cf3e',
-        genres: ['agile', 'patterns', 'design']
-    },
-    {
-        title: 'Refactoring, edition 2',
-        published: 2018,
-        author: 'Martin Fowler',
-        id: 'afa5de00-344d-11e9-a414-719c6709cf3e',
-        genres: ['refactoring']
-    },
-    {
-        title: 'Refactoring to patterns',
-        published: 2008,
-        author: 'Joshua Kerievsky',
-        id: 'afa5de01-344d-11e9-a414-719c6709cf3e',
-        genres: ['refactoring', 'patterns']
-    },
-    {
-        title: 'Practical Object-Oriented Design, An Agile Primer Using Ruby',
-        published: 2012,
-        author: 'Sandi Metz',
-        id: 'afa5de02-344d-11e9-a414-719c6709cf3e',
-        genres: ['refactoring', 'design']
-    },
-    {
-        title: 'Crime and punishment',
-        published: 1866,
-        author: 'Fyodor Dostoevsky',
-        id: 'afa5de03-344d-11e9-a414-719c6709cf3e',
-        genres: ['classic', 'crime']
-    },
-    {
-        title: 'The Demon',
-        published: 1872,
-        author: 'Fyodor Dostoevsky',
-        id: 'afa5de04-344d-11e9-a414-719c6709cf3e',
-        genres: ['classic', 'revolution']
-    },
-]
+const Author = require('./models/author')
+const Book = require('./models/book')
+const User = require('./models/user')
+
+const MONGODB_URI = process.env.MONGODB_URI
+const JWT_SECRET = process.env.JWT_SECRET
+
+console.log('connecting to', MONGODB_URI)
+
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true })
+    .then(() => {
+        console.log('connected to MongoDB')
+    })
+    .catch((error) => {
+        console.log('error connection to MongoDB:', error.message)
+    })
+
 
 const typeDefs = gql`
     type Author {
         name: String!
         born: Int
         id: ID!
-        bookCount: ID!
+        bookCount: Int!
     }
     type Book {
         title: String!
         published: Int!
-        author: String!
+        author: Author!
         id: ID!
         genres: [String!]!
+    }
+    type User {
+        username: String!
+        favoriteGenre: String!
+        id: ID!
+    }
+    type Token {
+        value: String!
     }
     type Query {
         bookCount: Int!
         authorCount: Int!
-        allBooks (author: String, genre: String): [Book!]!
-        allAuthors: [Author!]!
+        allBooks (author: String, genre: String): [Book]!
+        allAuthors: [Author]!
+        me: User
     }
     type Mutation {
         addBook(
             title: String!
             author: String!
-            published: Int!
-            genres: [String!]!
+            published: Int
+            genres: [String]
         ): Book
         editAuthor(
             name: String!
             setBornTo: Int!
         ): Author
+        createUser(
+            username: String!
+            favoriteGenre: String!
+        ): User
+        login(
+            username: String!
+            password: String!
+        ): Token
     }
 `
 
 const resolvers = {
     Query: {
-        bookCount: () => books.length,
-        authorCount: () => authors.length,
-        allBooks: (root, args) => {
-            let authorFilter = (b) => b.author == args.author
-            let genreFilter = (b) => b.genres.includes(args.genre)
-
-            if (args.author && args.genre) {
-                return books.filter(authorFilter).filter(genreFilter)
-            }
-
+        bookCount: () => Book.count(),
+        authorCount: () => Author.count(),
+        allBooks: async (root, args) => {
+            let query = {}
             if (args.author) {
-                return books.filter(authorFilter)
+                const authorObj = await Author.findOne({ name: args.author })
+                query.author = authorObj._id
             }
             if (args.genre) {
-                return books.filter(genreFilter)
+                query.genres = { $in: [ args.genre ] }
             }
+            const books = await Book.find(query).populate('author', { name: 1, born: 1 })
             return books
+
         },
-        allAuthors: () => authors,
+        allAuthors: () => Author.find(),
+        me: (root, args, context) => {
+            return context.currentUser
+        },
     },
     Author: {
-        bookCount: (root) => books.reduce((acc, b) => b.author === root.name ? acc+1 : acc, 0)
+        bookCount: async (root) => {
+            const author = await Author.findOne({ name: root.name })
+            return await Book.count({ author: author._id })
+        }
     },
     Mutation: {
-        addBook: (root, args) => {
-            if (!authors.find(a => a.name === args.author)) {
-                authors = authors.concat({
-                    name: args.author,
-                    id: uuid(),
-                })
+        addBook: async (root, args, { currentUser }) => {
+            if (!currentUser) {
+                throw new AuthenticationError('not authenticated')
+            }
+            const { title, published, author, genres } = args
+
+            if (!title || !author) {
+                throw new UserInputError('Book title and author required.')
+            }
+            if (author.length < 4) {
+                throw new UserInputError('Author name must be at least 4 characters long.')
             }
 
-            const book = {
-                title: args.title,
-                published: args.published,
-                author: args.author,
-                genres: args.genres,
-                id: uuid(),
+            let authorObj = await Author.findOne({ name: args.author })
+            if (!authorObj) {
+                authorObj = new Author({ name: args.author })
+                await author.save()
             }
 
-            books = books.concat(book)
-            return book
+            if (title.length < 2) {
+                throw new UserInputError('Title must be at least 2 characters long.')
+            }
+            if (published && !Number.isInteger(Number(published))) {
+                throw new UserInputError('Publish year must be an integer.')
+            }
+
+            const book = new Book({
+                title: title,
+                published: published,
+                genres: genres,
+                author: authorObj._id,
+            })
+
+            const savedBook = await book.save()
+
+            await savedBook.populate('author', { name: 1, born: 1 }).execPopulate()
+            return savedBook
         },
-        editAuthor: (root, args) => {
-            let author = authors.find(a => a.name === args.name)
+        editAuthor: async (root, args, { currentUser }) => {
+            if (!currentUser) {
+                throw new AuthenticationError('not authenticated')
+            }
+            if (!args.name) {
+                throw new UserInputError('Author name missing.')
+            }
+            if (args.name.length < 4) {
+                throw new UserInputError('Author name must be at least 4 characters long.')
+            }
+            const author = await Author.findOne({ name: args.name })
             if (!author) {
-                return null
+                throw new UserInputError('Author not found.')
+            }
+            if (!Number.isInteger(Number(args.setBornTo))) {
+                throw new UserInputError('Author birth year must be an integer.')
             }
             author.born = args.setBornTo
-            authors = authors.map(a => a.id === author.id ? author : a)
-            return author
+            return await author.save()
+        },
+        createUser: (root, args) => {
+            if (!args.username) {
+                throw new UserInputError('Username missing.')
+            }
+            if (!args.favoriteGenre) {
+                throw new UserInputError('Favorite genre missing.')
+            }
+            const user = new User({ username: args.username })
+
+            return user.save()
+                .catch(error => {
+                    throw new UserInputError(error.message, {
+                        invalidArgs: args,
+                    })
+                })
+        },
+        login: async (root, args) => {
+            if (!args.username) {
+                throw new UserInputError('Username missing.')
+            }
+            if (!args.password) {
+                throw new UserInputError('Password missing.')
+            }
+            const user = await User.findOne({ username: args.username })
+
+            if (!user || args.password !== 'secred') {
+                throw new UserInputError('wrong credentials')
+            }
+
+            const userForToken = {
+                username: user.username,
+                id: user._id,
+            }
+
+            return { value: jwt.sign(userForToken, JWT_SECRET) }
         },
     }
 }
@@ -179,6 +209,14 @@ const resolvers = {
 const server = new ApolloServer({
     typeDefs,
     resolvers,
+    context: async ({ req }) => {
+        const auth = req ? req.headers.authorization : null
+        if (auth && auth.toLowerCase().startsWith('bearer ')) {
+            const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET)
+            const currentUser = await User.findById(decodedToken.id)
+            return { currentUser }
+        }
+    },
 })
 
 server.listen().then(({ url }) => {
