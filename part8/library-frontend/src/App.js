@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { gql } from 'apollo-boost'
-import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
+import {
+    useQuery,
+    useMutation,
+    useApolloClient,
+    useSubscription,
+} from '@apollo/react-hooks'
 
 import Authors from './components/Authors'
 import Books from './components/Books'
@@ -19,20 +24,36 @@ const ALL_AUTHORS = gql`
 }
 `
 
+const BOOK_DETAILS = gql`
+fragment BookDetails on Book {
+    id
+    title
+    published
+    genres
+    author {
+        name
+        born
+        bookCount
+    }
+}
+`
+
 const ALL_BOOKS = gql`
 query allBooks($genre: String) {
     allBooks(genre: $genre) {
-        id
-        title
-        published
-        genres
-        author {
-            name
-            born
-            bookCount
-        }
+        ...BookDetails
     }
 }
+${BOOK_DETAILS}
+`
+
+const BOOK_ADDED = gql`
+subscription {
+    bookAdded {
+        ...BookDetails
+    }
+}
+${BOOK_DETAILS}
 `
 
 const ALL_GENRES = gql`
@@ -126,14 +147,6 @@ const App = () => {
     const [addBookMutation] = useMutation(ADD_BOOK, {
         onError: handleError,
         refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
-        update: (store, response) => {
-            const dataInStore = store.readQuery({ query: ALL_BOOKS, variables: { 'genre': null } })
-            dataInStore.allBooks.push(response.data.addBook)
-            store.writeQuery({
-                query: ALL_BOOKS,
-                data: dataInStore,
-            })
-        }
     })
 
     const [editAuthorMutation] = useMutation(EDIT_AUTHOR, {
@@ -143,6 +156,29 @@ const App = () => {
 
     const [loginMutation] = useMutation(LOGIN, {
         onError: handleError,
+    })
+
+    useSubscription(BOOK_ADDED, {
+        onSubscriptionData: ({ client, subscriptionData }) => {
+            const book = subscriptionData.data.bookAdded
+            const dataInStore = client.readQuery({
+                query: ALL_BOOKS,
+                variables: { 'genre': null }
+            })
+
+            if (dataInStore.allBooks.find(b => b.id === book.id)) {
+                return
+            }
+
+            dataInStore.allBooks.push(book)
+
+            client.writeQuery({
+                query: ALL_BOOKS,
+                data: dataInStore,
+            })
+
+            alert(`Book '${book.title}' added.`)
+        }
     })
 
     const loginHandler = async (event) => {
@@ -161,6 +197,7 @@ const App = () => {
     const logoutHandler = () => {
         window.localStorage.removeItem('token')
         setToken(null)
+        setPage('authors')
         client.resetStore()
     }
 
