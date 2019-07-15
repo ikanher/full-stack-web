@@ -2,19 +2,17 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import ApolloClient from 'apollo-boost'
 import { ApolloProvider } from '@apollo/react-hooks'
-import { HttpLink } from 'apollo-link-http'
+import { InMemoryCache } from 'apollo-cache-inmemory'
 
 import App from './App'
 
 const token = window.localStorage.getItem('token')
-
-const link = new HttpLink({
-    headers: { authorization: `Bearer ${token}` }
-})
+const headers = { authorization: token ? `Bearer ${token}` : null }
 
 const client = new ApolloClient({
-    link,
     uri: 'http://localhost:4000/graphql',
+    headers,
+    cache: new InMemoryCache(),
 })
 
 ReactDOM.render(

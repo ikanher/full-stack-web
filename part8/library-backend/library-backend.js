@@ -7,7 +7,9 @@ const {
 
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
+
 mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true);
 
 require('dotenv').config()
 
@@ -31,22 +33,22 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true })
 
 const typeDefs = gql`
     type Author {
+        id: ID!
         name: String!
         born: Int
-        id: ID!
-        bookCount: Int!
+        bookCount: Int
     }
     type Book {
+        id: ID!
         title: String!
         published: Int!
         author: Author!
-        id: ID!
         genres: [String!]!
     }
     type User {
+        id: ID!
         username: String!
         favoriteGenre: String!
-        id: ID!
     }
     type Token {
         value: String!
@@ -56,6 +58,7 @@ const typeDefs = gql`
         authorCount: Int!
         allBooks (author: String, genre: String): [Book]!
         allAuthors: [Author]!
+        allGenres: [String]!
         me: User
     }
     type Mutation {
@@ -82,8 +85,8 @@ const typeDefs = gql`
 
 const resolvers = {
     Query: {
-        bookCount: () => Book.count(),
-        authorCount: () => Author.count(),
+        bookCount: () => Book.countDocuments(),
+        authorCount: () => Author.countDocuments(),
         allBooks: async (root, args) => {
             let query = {}
             if (args.author) {
@@ -98,6 +101,7 @@ const resolvers = {
 
         },
         allAuthors: () => Author.find(),
+        allGenres: () => Book.distinct('genres'),
         me: (root, args, context) => {
             return context.currentUser
         },
@@ -105,7 +109,7 @@ const resolvers = {
     Author: {
         bookCount: async (root) => {
             const author = await Author.findOne({ name: root.name })
-            return await Book.count({ author: author._id })
+            return await Book.countDocuments({ author: author._id })
         }
     },
     Mutation: {
@@ -125,7 +129,7 @@ const resolvers = {
             let authorObj = await Author.findOne({ name: args.author })
             if (!authorObj) {
                 authorObj = new Author({ name: args.author })
-                await author.save()
+                await authorObj.save()
             }
 
             if (title.length < 2) {
@@ -144,7 +148,7 @@ const resolvers = {
 
             const savedBook = await book.save()
 
-            await savedBook.populate('author', { name: 1, born: 1 }).execPopulate()
+            await savedBook.populate('author').execPopulate()
             return savedBook
         },
         editAuthor: async (root, args, { currentUser }) => {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { gql } from 'apollo-boost'
-import { useQuery, useMutation } from '@apollo/react-hooks'
+import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm.js'
+import Recommend from './components/Recommend.js'
 
 const ALL_AUTHORS = gql`
 {
@@ -19,11 +20,12 @@ const ALL_AUTHORS = gql`
 `
 
 const ALL_BOOKS = gql`
-{
-    allBooks {
+query allBooks($genre: String) {
+    allBooks(genre: $genre) {
         id
         title
         published
+        genres
         author {
             name
             born
@@ -33,14 +35,20 @@ const ALL_BOOKS = gql`
 }
 `
 
-//const ME = gql`
-//{
-//    me {
-//        username,
-//        favoriteGenre
-//    }
-//}
-//`
+const ALL_GENRES = gql`
+{
+    allGenres
+}
+`
+
+const ME = gql`
+{
+    me {
+        username,
+        favoriteGenre
+    }
+}
+`
 
 const ADD_BOOK = gql`
 mutation addBook($title: String!, $author: String!, $published: Int!, $genres: [String!]!) {
@@ -50,6 +58,7 @@ mutation addBook($title: String!, $author: String!, $published: Int!, $genres: [
         published: $published
         genres: $genres
     ) {
+        id
         title
         published
         genres
@@ -67,6 +76,7 @@ mutation editAuthor($name: String!, $setBornTo: Int!) {
         name: $name
         setBornTo: $setBornTo
     ) {
+        id
         name
         born
     }
@@ -85,11 +95,14 @@ mutation login($username: String!, $password: String!) {
 `
 
 const App = () => {
+    const client = useApolloClient()
+
     const [page, setPage] = useState('authors')
     const [errorMessage, setErrorMessage] = useState(null)
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [token, setToken] = useState(null)
+    const [genre, setGenre] = useState(null)
 
     useEffect(() => {
         const token = window.localStorage.getItem('token')
@@ -97,7 +110,11 @@ const App = () => {
     },[])
 
     const authorQuery = useQuery(ALL_AUTHORS)
-    const bookQuery = useQuery(ALL_BOOKS)
+    const bookQuery = useQuery(ALL_BOOKS, {
+        variables: { genre: genre }
+    })
+    const genreQuery = useQuery(ALL_GENRES)
+    const meQuery = useQuery(ME)
 
     const handleError = (error) => {
         setErrorMessage(error.graphQLErrors[0].message || error)
@@ -109,6 +126,14 @@ const App = () => {
     const [addBookMutation] = useMutation(ADD_BOOK, {
         onError: handleError,
         refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+        update: (store, response) => {
+            const dataInStore = store.readQuery({ query: ALL_BOOKS, variables: { 'genre': null } })
+            dataInStore.allBooks.push(response.data.addBook)
+            store.writeQuery({
+                query: ALL_BOOKS,
+                data: dataInStore,
+            })
+        }
     })
 
     const [editAuthorMutation] = useMutation(EDIT_AUTHOR, {
@@ -128,6 +153,7 @@ const App = () => {
         const token = response.data.login.value
         setToken(token)
         window.localStorage.setItem('token', token)
+        setPage('authors')
     }
 
     const usernameHandler = ({ target }) => setUsername(target.value)
@@ -135,6 +161,7 @@ const App = () => {
     const logoutHandler = () => {
         window.localStorage.removeItem('token')
         setToken(null)
+        client.resetStore()
     }
 
     return (
@@ -145,37 +172,45 @@ const App = () => {
                 </div>
             }
 
-            {!token ?
+            <div>
+                <button onClick={() => setPage('authors')}>authors</button>
+                <button onClick={() => { setPage('books'); setGenre(null) } }>books</button>
+                { token && <button onClick={() => setPage('recommend')}>recommend</button> }
+                { token && <button onClick={() => setPage('add')}>add book</button> }
+                { token && <button onClick={logoutHandler}>logout</button> }
+                { !token && <button onClick={() => setPage('login')}>login</button> }
+            </div>
 
-                <LoginForm
-                    usernameHandler={usernameHandler}
-                    passwordHandler={passwordHandler}
-                    loginHandler={loginHandler}
-                />
-                :
-            <>
-                <div>
-                    <button onClick={() => setPage('authors')}>authors</button>
-                    <button onClick={() => setPage('books')}>books</button>
-                    <button onClick={() => setPage('add')}>add book</button>
-                    <button onClick={logoutHandler}>logout</button>
-                </div>
+            <LoginForm
+                show={page === 'login'}
+                usernameHandler={usernameHandler}
+                passwordHandler={passwordHandler}
+                loginHandler={loginHandler}
+            />
 
-                <Authors
-                    show={page === 'authors'}
-                    authorQuery={authorQuery}
-                    editAuthorMutation={editAuthorMutation}
-                />
+            <Recommend
+                show={page === 'recommend'}
+                meQuery={meQuery}
+                bookQuery={bookQuery}
+                setGenre={setGenre}
+            />
 
-                <Books
-                    show={page === 'books'} bookQuery={bookQuery}
-                />
+            <Authors
+                show={page === 'authors'}
+                authorQuery={authorQuery}
+                editAuthorMutation={editAuthorMutation}
+            />
 
-                <NewBook
-                    show={page === 'add'} addBookMutation={addBookMutation}
-                />
-            </>
-            }
+            <Books
+                show={page === 'books'}
+                bookQuery={bookQuery}
+                genreQuery={genreQuery}
+                setGenre={setGenre}
+            />
+
+            <NewBook
+                show={page === 'add'} addBookMutation={addBookMutation}
+            />
 
         </div>
     )

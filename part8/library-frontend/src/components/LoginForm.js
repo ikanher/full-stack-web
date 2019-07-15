@@ -1,6 +1,9 @@
 import React from 'react'
 
-const LoginForm = ({ loginHandler, usernameHandler, passwordHandler }) => {
+const LoginForm = ({ show, loginHandler, usernameHandler, passwordHandler }) => {
+    if (!show) {
+        return null
+    }
     return (
         <>
             <h2>Login</h2>

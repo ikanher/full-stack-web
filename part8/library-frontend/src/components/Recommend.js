@@ -1,29 +1,24 @@
 import React from 'react'
 
-const Books = (props) => {
+const Recommend = (props) => {
     if (!props.show) {
         return null
     }
 
-    if (props.bookQuery.loading || props.genreQuery.loading) {
+    if (props.bookQuery.loading || props.meQuery.loading) {
         return <div>loading...</div>
     }
 
-    const books = props.bookQuery.data.allBooks
+    const genre = props.meQuery.data.me.favoriteGenre
+    props.setGenre(genre)
 
-    const GenreButtons = () => {
-        return (
-            <div>
-                {props.genreQuery.data.allGenres.map(
-                    g => <button key={g} onClick={() => props.setGenre(g)}>{g}</button>
-                )}
-            </div>
-        )
-    }
+    const books = props.bookQuery.data.allBooks
 
     return (
         <div>
-            <h2>books</h2>
+            <h2>Recommendations</h2>
+
+            <p>Books in your favorite genre <b>{genre}</b></p>
 
             <table>
                 <tbody>
@@ -45,11 +40,8 @@ const Books = (props) => {
                     )}
                 </tbody>
             </table>
-            <div>
-                <GenreButtons />
-            </div>
         </div>
     )
 }
 
-export default Books
+export default Recommend
